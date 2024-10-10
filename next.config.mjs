@@ -1,4 +1,16 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {};
-
-export default nextConfig;
+const nextConfig = {
+    images: {
+      remotePatterns: [
+        {
+          protocol: 'https',
+          hostname: 'liveblocks.io',
+          port: '',
+          pathname: '/avatars/**',
+        },
+      ],
+    },
+  };
+  
+  export default nextConfig;
+  
