@@ -103,7 +103,7 @@ export const handleCanvasMouseDown = ({
 };
 
 // handle mouse move event on canvas to draw shapes with different dimensions
-export const handleCanvaseMouseMove = ({
+export const handleCanvasMouseMove = ({
   options,
   canvas,
   isDrawing,
@@ -111,7 +111,7 @@ export const handleCanvaseMouseMove = ({
   shapeRef,
   syncShapeInStorage,
 }: CanvasMouseMove) => {
-  // if selected shape is freeform, return
+  // if selected shape is freeform, returnw
   if (!isDrawing.current) return;
   if (selectedShapeRef.current === "freeform") return;
 
@@ -334,52 +334,52 @@ export const handleCanvasObjectScaling = ({
   }));
 };
 
-// render canvas objects coming from storage on canvas
-export const renderCanvas = ({
-  fabricRef,
-  canvasObjects,
-  activeObjectRef,
-}: RenderCanvas) => {
-  // clear canvas
-  fabricRef.current?.clear();
 
-  // render all objects on canvas
-  Array.from(canvasObjects, ([objectId, objectData]) => {
-    /**
-     * enlivenObjects() is used to render objects on canvas.
-     * It takes two arguments:
-     * 1. objectData: object data to render on canvas
-     * 2. callback: callback function to execute after rendering objects
-     * on canvas
-     *
-     * enlivenObjects: http://fabricjs.com/docs/fabric.util.html#.enlivenObjectEnlivables
-     */
-    fabric.util.enlivenObjects(
-      [objectData],
-      (enlivenedObjects: fabric.Object[]) => {
-        enlivenedObjects.forEach((enlivenedObj) => {
-          // if element is active, keep it in active state so that it can be edited further
-          if (activeObjectRef.current?.objectId === objectId) {
-            fabricRef.current?.setActiveObject(enlivenedObj);
-          }
+// // render canvas objects coming from storage on canvas
+// export const renderCanvas = ({
+//   fabricRef,
+//   canvasObjects,
+//   activeObjectRef,
+// }: RenderCanvas) => {
+//   // clear canvas
+//   fabricRef.current?.clear();
 
-          // add object to canvas
-          fabricRef.current?.add(enlivenedObj);
-        });
-      },
-      /**
-       * specify namespace of the object for fabric to render it on canvas
-       * A namespace is a string that is used to identify the type of
-       * object.
-       *
-       * Fabric Namespace: http://fabricjs.com/docs/fabric.html
-       */
-      "fabric"
-    );
-  });
+//   // render all objects on canvas
+//   Array.from(canvasObjects, ([objectId, objectData]) => {
+//     /**
+//      * enlivenObjects() is used to render objects on canvas.
+//      * It takes two arguments:
+//      * 1. objectData: object data to render on canvas
+//      * 2. callback: callback function to execute after rendering objects
+//      * on canvas
+//      *
+//      * enlivenObjects: http://fabricjs.com/docs/fabric.util.html#.enlivenObjectEnlivables
+//      */
+//     fabric.util.enlivenObjects(
+//       [objectData],
+//       (enlivenedObjects: fabric.Object[]) => {
+//         enlivenedObjects.forEach((enlivenedObj) => {
+//           // if element is active, keep it in active state so that it can be edited further
+//           if (activeObjectRef.current?.objectId === objectId) {
+//             fabricRef.current?.setActiveObject(enlivenedObj);
+//           }
 
-  fabricRef.current?.renderAll();
-};
+//           // add object to canvas
+//           fabricRef.current?.add(enlivenedObj);
+//         });
+//       },
+//       /**
+//        * specify namespace of the object for fabric to render it on canvas
+//        * A namespace is a string that is used to identify the type of
+//        * object.
+//        *
+//        * Fabric Namespace: http://fabricjs.com/docs/fabric.html
+//        */
+//       "fabric"
+//     );
+//   });
+//   fabricRef.current?.renderAll();
+// };
 
 // resize canvas dimensions on window resize
 export const handleResize = ({ canvas }: { canvas: fabric.Canvas | null }) => {
@@ -419,4 +419,32 @@ export const handleCanvasZoom = ({
 
   options.e.preventDefault();
   options.e.stopPropagation();
+};
+
+
+export const renderCanvas = ({
+  fabricRef,
+  canvasObjects,
+  activeObjectRef,
+}: RenderCanvas) => {
+  if (!fabricRef.current) return;
+
+  // clear canvas AFTER objects have been processed
+  fabric.util.enlivenObjects(
+    Array.from(canvasObjects).map(([objectId, objectData]) => objectData),
+    (enlivenedObjects: fabric.Object[]) => {
+      fabricRef.current?.clear();  // Clear only here after we know objects exist
+
+      enlivenedObjects.forEach((enlivenedObj) => {
+        fabricRef.current?.add(enlivenedObj);
+
+        // If activeObjectRef matches, set the object as active
+        if (activeObjectRef.current?.objectId === enlivenedObj.objectId) {
+          fabricRef.current?.setActiveObject(enlivenedObj);
+        }
+      });
+
+      fabricRef.current?.renderAll();
+    }
+  );
 };

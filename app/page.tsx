@@ -3,13 +3,12 @@
 import * as fabric from "fabric";
 import { useState, useEffect, useRef } from "react";
 
-console.log(fabric);
-
 import LeftSidebar from "@/components/LeftSidebar";
 import Live from "@/components/Live";
 import Navbar from "@/components/Navbar";
 import RightSidebar from "@/components/RightSidebar";
-import { handleCanvasMouseDown, handleCanvasMouseMove, handleCanvasMouseUp, handleResize, initializeFabric } from "@/lib/canvas";
+import { handleCanvasMouseDown, handleCanvasMouseMove, handleCanvasMouseUp, handleResize, initializeFabric, renderCanvas } from "@/lib/canvas";
+import { ActiveElement } from "@/types/type";
 import { useStorage } from "@/liveblocks.config";
 import { useMutation } from "@liveblocks/react";
 
@@ -26,12 +25,13 @@ export default function Page() {
   const syncShapeInStorage = useMutation(({ storage }, object) => {
     if(!object) return;
 
-    const {objectId} = object;
+    const { objectId } = object;
 
     const shapeData = object.toJSON();
     shapeData.objectId = objectId;
 
-    const canvasObjects = storage.get("canvasObjects");
+    const canvasObjects = storage.get('canvasObjects');
+
     canvasObjects.set(objectId, shapeData);
 
   }, []);
@@ -43,16 +43,12 @@ export default function Page() {
       icon: "",
     });
 
-    const handleActiveElement = (elem: ActiveElement) => { 
-      setActiveElement(elem) 
-      selectedShapeRef.current = elem?.value as string
-    }
+  const handleActiveElement = (elem: ActiveElement) => { 
+    setActiveElement(elem) 
+    selectedShapeRef.current = elem?.value as string
+  }
 
   useEffect(() => {
-    if (fabricRef.current) {
-      fabricRef.current.dispose();
-    }
-
     const canvas = initializeFabric({ canvasRef, fabricRef })
     
     canvas.on("mouse:down", (options) => {
@@ -91,7 +87,21 @@ export default function Page() {
     window.addEventListener("resize", () => {
       handleResize({ fabricRef })
     })
+
+    return () => {
+      canvas.dispose();
+    }
+
   }, [])
+
+  useEffect(() => {
+    console.log('Canvas objects:', canvasObjects);
+    renderCanvas({ 
+      fabricRef, 
+      canvasObjects, 
+      activeObjectRef 
+    });
+  }, [canvasObjects])
 
   return (
     <main className="h-screen overflow-hidden">

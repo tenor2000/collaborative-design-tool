@@ -11,7 +11,7 @@ const workSans = Work_Sans({
 
 export const metadata: Metadata = {
   title: "Collaborative Design Tool",
-  description: "A collaboration tool for live interaction and design using Fabris.js and Liveblocks for realtime collaboration.",
+  description: "A collaboration tool for live interaction and design using Fabric.js and Liveblocks for realtime collaboration.",
 };
 
 export default function RootLayout({
